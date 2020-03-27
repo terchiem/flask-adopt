@@ -6,17 +6,21 @@
 {% block content %}
 <section>
   {% for pet in pets %}
-    <div>
-      {% if pet.photo_url %}
-      <img src="{{pet.photo_url}}" alt="{{pet.name}}">
-      {% endif %}
-      <p>{{pet.name}}
-        {% if pet.available %}
-        <b>is available!</b>
+    <a href="/{{ pet.id }}">
+      <div class="pet-info">
+        {% if pet.photo_url %}
+        <img src="{{pet.photo_url}}" alt="{{pet.name}}">
         {% endif %}
-      </p>
-    </div>
+        <p>{{pet.name}}
+          {% if pet.available %}
+          <b>is available!</b>
+          {% endif %}
+        </p>
+      </div>
+    </a>
   {% endfor %}
 </section>
+
+<a class="btn btn-primary" href="/add">Add a Pet</a>
 
 {% endblock %}
