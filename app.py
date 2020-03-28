@@ -5,6 +5,9 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Pet
 from seed import setup_db
 from forms import AddPetForm, EditPetForm
+from secrets import PET_FINDER_API_KEY, PET_FINDER_SECRET
+import requests as HTTP_request
+from pet_finder import request_pet_finder_token, get_random_pet
 
 app = Flask(__name__)
 
@@ -27,13 +30,22 @@ toolbar = DebugToolbarExtension(app)
 # run seed file with sample data
 # setup_db()
 
+
+
 @app.route('/')
 def list_pets():
-    """ Show a list of all pets """
+    """ Show a list of all pets + PetFinder random pet"""
 
     pets = Pet.query.all()
 
-    return render_template('index.html', pets=pets)
+    # get random pet from PetFinder API
+    pet_finder_pet = get_random_pet()
+
+    return render_template('index.html',
+                            pets=pets,
+                            pet_name=pet_finder_pet["name"],
+                            pet_age=pet_finder_pet["age"],
+                            pet_url=pet_finder_pet["photo_url"])
 
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -57,7 +69,7 @@ def add_pet():
         db.session.commit()
 
         return redirect('/')
-    
+
     else:
         return render_template('add_pet_form.html', form=form)
 
@@ -72,10 +84,11 @@ def show_pet_details(pet_id):
         pet.photo_url = form.photo_url.data
         pet.notes = form.notes.data
         pet.available = form.available.data
-        
+
         db.session.commit()
         flash(f"Pet {pet.name} updated!")
         return redirect('/')
 
     else:
         return render_template('pet_details.html', pet=pet, form=form)
+
